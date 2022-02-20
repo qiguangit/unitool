@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+  <id>com.qiguangit.plugin</id>
+  <name>generateCode</name>
+  <description>
+      <![CDATA[
+        xxxx
+        xxxx
+      ]]>
+  </description>
+  <version>0.0.1</version>
+  <fx-configurations>
+    <fx-configuration>
+    <fxml-path>/fxml/generateLayout.fxml</fxml-path>
+    <resource-bundle-name>locale.reBundle</resource-bundle-name>
+    <menu>menuPlugin</menu>
+    <title>代码生成器</title>
+    <controller-type>node</controller-type>
+    </fx-configuration>
+  </fx-configurations>
+</plugin>

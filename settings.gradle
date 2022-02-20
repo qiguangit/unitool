@@ -1,0 +1,4 @@
+rootProject.name = 'unitool'
+include 'generate-code'
+include 'core'
+

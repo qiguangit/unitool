@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+<VBox prefHeight="600" prefWidth="800" spacing="5"
+      xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/10.0.2-internal"
+      fx:controller="com.qiguangit.unitool.view.controller.MainController">
+
+  <MenuBar>
+    <Menu text="菜单" fx:id="menuMain">
+      <MenuItem text="控制台" fx:id="menuConsole" onAction="#onMenuConsoleListener"/>
+      <MenuItem text="退出" fx:id="menuExit" onAction="#onMenuExitListener"/>
+    </Menu>
+    <Menu text="插件" fx:id="menuPlugin" onAction="#onMenuPluginListener">
+
+    </Menu>
+  </MenuBar>
+
+  <padding>
+    <Insets topRightBottomLeft="3"/>
+  </padding>
+
+  <TabPane VBox.vgrow="ALWAYS" tabMinWidth="45" fx:id="tabPane" tabClosingPolicy="ALL_TABS">
+    <Tab fx:id="tab_default" text="默认面板">
+      <BorderPane>
+        <center>
+          <Text text="默认面板"></Text>
+        </center>
+      </BorderPane>
+    </Tab>
+  </TabPane>
+</VBox>
