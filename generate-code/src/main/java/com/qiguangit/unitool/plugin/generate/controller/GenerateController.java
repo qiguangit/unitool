@@ -1,40 +1,52 @@
 package com.qiguangit.unitool.plugin.generate.controller;
 
 import com.google.gson.Gson;
-import com.qiguangit.unitool.plugin.generate.generator.EntityGenerator;
-import com.qiguangit.unitool.plugin.generate.generator.HibernateTemplateGenerator;
-import com.qiguangit.unitool.plugin.generate.model.HibernateModel;
-import com.qiguangit.unitool.plugin.generate.GenerateApp;
+import com.qiguangit.unitool.controller.BaseController;
+import com.qiguangit.unitool.plugin.generate.generator.TemplateGenerator;
+import com.qiguangit.unitool.plugin.generate.model.TableModel;
+import com.qiguangit.unitool.plugin.generate.util.VariableUtils;
 import com.qiguangit.unitool.util.BeanUtils;
 import com.qiguangit.unitool.view.util.TableViewUtils;
-import freemarker.template.TemplateException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.JavaFXBuilderFactory;
+import javafx.scene.Scene;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
-public class GenerateController implements Initializable, Observer {
+public class GenerateController extends BaseController {
     @FXML
     private TableView tvContent;
+    @FXML
+    private TextField tvProjectPath;
     @FXML
     private TextField tfTableNm;
     @FXML
     private TextField tfPackageNm;
+    @FXML
+    private TableColumn idxColumn;
     @FXML
     private TableColumn attrNameColumn;
     @FXML
@@ -47,29 +59,24 @@ public class GenerateController implements Initializable, Observer {
     private TableColumn lengthColumn;
     @FXML
     private TableColumn defaultValueColumn;
-
     @FXML
     private VBox rootView;
     private ObservableList<Map<String, Object>> data;
-    private HibernateModel model;
+    private TableModel model;
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        GenerateApp.observable.addObserver(this);
-        initData();
-        initView();
-        initListener();
-    }
-
-    private void initListener() {
+    public void initListener() {
         tfTableNm.textProperty().addListener((observable, oldValue, newValue) -> model.setTableName(newValue));
         tfPackageNm.textProperty().addListener((observable, oldValue, newValue) -> model.setPackageName(newValue));
+        tvProjectPath.textProperty().addListener((observable, oldValue, newValue) -> {
+            model.setProjectPath(newValue);
+            VariableUtils.put("projectPath", newValue);
+        });
     }
 
-    private void initData() {
-        model = new HibernateModel();
+    public void initData() {
+        model = new TableModel();
         model.setFields(new ArrayList<>());
-        final HashMap<String, Object> newLineData = new HashMap<>();
+        HashMap<String, Object> newLineData = new HashMap<>();
         newLineData.put("typeColumn", "varchar");
         newLineData.put("notNullColumn", "true");
         newLineData.put("lengthColumn", "0");
@@ -80,23 +87,28 @@ public class GenerateController implements Initializable, Observer {
     private void readCache() {
         String property = System.getProperty("user.dir");
         try {
-            final byte[] bytes = Files.readAllBytes(Paths.get(property + "/data.json"));
-            if (bytes.length > 0) {
-                model = new Gson().fromJson(new String(bytes, StandardCharsets.UTF_8), HibernateModel.class);
-                tfPackageNm.textProperty().setValue(model.getPackageName());
-                tfTableNm.textProperty().setValue(model.getTableName());
-                data = FXCollections.observableArrayList();
-                model.getFields().forEach(field -> {
-                    final Map<String, Object> fields = BeanUtils.bean2Map(field);
-                    data.add(fields);
-                });
+            Path path = Paths.get(property + "/data.json");
+            if (path.toFile().exists()) {
+                byte[] bytes = Files.readAllBytes(path);
+                if (bytes.length > 0) {
+                    model = new Gson().fromJson(new String(bytes, StandardCharsets.UTF_8), TableModel.class);
+                    tfPackageNm.textProperty().setValue(model.getPackageName());
+                    tfTableNm.textProperty().setValue(model.getTableName());
+                    data = FXCollections.observableArrayList();
+                    model.getFields().forEach(field -> {
+                        Map<String, Object> fields = BeanUtils.bean2Map(field);
+                        fields.put("idx", data.size() + 1);
+                        data.add(fields);
+                    });
+                }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.info("read cache error", e);
         }
     }
 
-    private void initView() {
+    public void initView() {
+        TableViewUtils.setTableColumnMapAsLabelValueFactory(idxColumn, "idx");
         TableViewUtils.setColumnMapValueFactory(attrNameColumn, "attrName", true);
         TableViewUtils.setTableColumnMapAsChoiceBoxValueFactory(typeColumn, "type", new Object[] {"int", "varchar", "text", "float"});
         TableViewUtils.setTableColumnMapAsChoiceBoxValueFactory(notNullColumn, "notNull", new Object[]{"true", "false"});
@@ -110,6 +122,7 @@ public class GenerateController implements Initializable, Observer {
 
     public void onAddLine(ActionEvent actionEvent) {
         final HashMap<String, Object> newLineData = new HashMap<>();
+        newLineData.put("idx", data.size() + 1);
         newLineData.put("type", "varchar");
         newLineData.put("notNull", "true");
         newLineData.put("length", "0");
@@ -119,41 +132,75 @@ public class GenerateController implements Initializable, Observer {
 
     public void onGenerate(ActionEvent actionEvent) {
         model.setClassName(tfTableNm.getText());
+        model.getFields().clear();
         tvContent.getItems()
                  .forEach((Consumer<Map<String, Object>>) o -> {
-                     final HibernateModel.Field field = BeanUtils.map2Bean(o, HibernateModel.Field.class);
+                     final TableModel.Field field = BeanUtils.map2Bean(o, TableModel.Field.class);
                      model.getFields().add(field);
                  });
         try {
-            HibernateTemplateGenerator
+            String modelStr = new Gson().toJson(model);
+            TemplateGenerator
                     .getInstance()
-                    .generateHbmXml(model, new OutputStreamWriter(System.out));
-            EntityGenerator
-                    .getInstance()
-                    .generateEntity(model, new OutputStreamWriter(System.out));
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (TemplateException e) {
-            e.printStackTrace();
+                    .generate(modelStr, "${tableUpperCamelCase}[.xml](hibernate-mapping).ftl", VariableUtils.get("projectPath"))
+                    .generate(modelStr, "${tableUpperCamelCase}[.java](entity).ftl", VariableUtils.get("projectPath"));
+        } catch (Exception e) {
+            logger.error("generate error", e);
         }
     }
 
     @Override
-    public void update(Observable o, Object arg) {
-        final String property = System.getProperty("user.dir");
-//        final List<HibernateModel.Field> fields = model.getFields();
-//        fields.clear();
-//        data.forEach(map-> {
-//            final HibernateModel.Field field = BeanUtils.map2Bean(map, HibernateModel.Field.class);
-//            fields.add(field);
-//        });
-//
-//        final String jsonModel = new Gson().toJson(model);
-//        try {
-//            Files.write(Paths.get(property + "/data.json"), jsonModel.getBytes("UTF-8"));
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        System.out.println("user dir：" + property);
+    public void onCloseAction() {
+        super.onCloseAction();
+        String property = System.getProperty("user.dir");
+        List<TableModel.Field> fields = model.getFields();
+        fields.clear();
+        data.forEach(map-> {
+            TableModel.Field field = BeanUtils.map2Bean(map, TableModel.Field.class);
+            fields.add(field);
+        });
+
+        String jsonModel = new Gson().toJson(model);
+        try {
+            Files.write(Paths.get(property + "/data.json"), jsonModel.getBytes(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            logger.error("cache write error", e);
+        }
+    }
+
+    public void showDirectoryChooser(ActionEvent actionEvent) {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        File selectedDirectory =
+                directoryChooser.showDialog(rootView.getScene().getWindow());
+        if (selectedDirectory != null) {
+            tvProjectPath.setText(selectedDirectory.getPath());
+        }
+    }
+
+    public void showVariableDialog(ActionEvent actionEvent) {
+        try {
+            Stage stage = new Stage();
+
+            FXMLLoader loader = new FXMLLoader();
+            loader.setBuilderFactory(new JavaFXBuilderFactory());
+            VBox vBox = loader.load(getClass().getResourceAsStream("/fxml/variableDialog.fxml"));
+            VariableDialogController controller =  loader.getController();
+            Scene scene = new Scene(vBox);
+            stage.setScene(scene);
+            stage.initStyle(StageStyle.DECORATED);
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(rootView.getScene().getWindow());
+            stage.setOnCloseRequest(e->{
+                VariableUtils.clear();
+                controller.getData().forEach(map -> {
+                    String key = (String) map.get("key");
+                    String value = (String) map.get("value");
+                    VariableUtils.put(key, value);
+                });
+            });
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -1,6 +1,6 @@
 package com.qiguangit.unitool;
 
-import com.qiguangit.unitool.plugin.generate.model.HibernateModel;
+import com.qiguangit.unitool.plugin.generate.model.TableModel;
 import com.qiguangit.unitool.util.BeanUtils;
 import org.junit.Test;
 
@@ -10,8 +10,8 @@ import java.util.Map;
 public class TestBeanUtils {
     @Test
     public void testBean2Map() {
-        HibernateModel.Field field = new HibernateModel.Field();
-        field.setFieldName("aaa");
+        TableModel.Field field = new TableModel.Field();
+        field.setAttrName("aaa");
         field.setAttrName("bbbb");
         field.setLength("1");
         field.setDefaultValue("aaa");
@@ -26,7 +26,7 @@ public class TestBeanUtils {
         map.put("attrName", "bbbb");
         map.put("length", 1);
         map.put("defaultValue", "aaa");
-        final HibernateModel.Field field = BeanUtils.map2Bean(map, HibernateModel.Field.class);
+        final TableModel.Field field = BeanUtils.map2Bean(map, TableModel.Field.class);
         System.out.println(field);
     }
 }

@@ -15,16 +15,11 @@
       <MenuItem text="退出" fx:id="menuExit" onAction="#onMenuExitListener"/>
     </Menu>
     <Menu text="插件" fx:id="menuPlugin" onAction="#onMenuPluginListener">
-
     </Menu>
   </MenuBar>
 
-  <padding>
-    <Insets topRightBottomLeft="3"/>
-  </padding>
-
   <TabPane VBox.vgrow="ALWAYS" tabMinWidth="45" fx:id="tabPane" tabClosingPolicy="ALL_TABS">
-    <Tab fx:id="tab_default" text="默认面板">
+    <Tab fx:id="tab_default" text="默认面板" closable="false">
       <BorderPane>
         <center>
           <Text text="默认面板"></Text>

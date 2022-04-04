@@ -11,9 +11,9 @@ public class App extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        PluginManager.getManager().parsePluginJars();
+
         Parent root = FXMLLoader.load(getClass().getResource("/resources/main.fxml"));
-        primaryStage.setTitle("代码生成器");
+        primaryStage.setTitle("unitool");
         final Scene scene = new Scene(root, 700, 800);
         primaryStage.setScene(scene);
         primaryStage.show();

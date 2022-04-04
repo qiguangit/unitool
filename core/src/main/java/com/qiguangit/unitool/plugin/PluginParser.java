@@ -62,7 +62,8 @@ public class PluginParser {
                     String menuPath = selectSingleText(element, "fx-configuration/menu");
                     String title = selectSingleText(element, "fx-configuration/title");
                     String controllerType = selectSingleText(element, "fx-configuration/controller-type");
-                    PluginJarInfo.FxConfiguration fxConfiguration = PluginJarInfo.FxConfiguration.builder()
+                    PluginJarInfo.FxConfiguration fxConfiguration =
+                            PluginJarInfo.FxConfiguration.builder()
                             .fxmlPath(fxmlPath)
                             .resourceBundleName(resourceBundleName)
                             .menu(menuPath)

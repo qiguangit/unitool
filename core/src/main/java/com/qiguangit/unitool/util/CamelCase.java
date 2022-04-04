@@ -11,13 +11,17 @@ import java.util.regex.Pattern;
 public class CamelCase implements TemplateMethodModelEx {
 
 
-    /** 下划线转驼峰 */
+    /**
+     * 下划线转驼峰
+     * @param str
+     * @param mode lowerCamel upperCamel
+     * */
     public String convertStr(String str, String mode) {
-        Pattern linePattern = Pattern.compile("hump".equals(mode)? "_([a-z0-9]+)" : "([a-z0-9]+)_?");
+        Pattern linePattern = Pattern.compile("lowerCamel".equals(mode)? "_([a-z0-9]+)" : "([a-z0-9]+)_?");
         str = str.toLowerCase();
         Matcher matcher = linePattern.matcher(str);
 
-        StringBuffer sb = new StringBuffer("hump".equals(mode) ? "" : mode);
+        StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
             String subStr = matcher.group(1);
             String concat = subStr.substring(0, 1).toUpperCase().concat(subStr.substring(1));
@@ -31,6 +35,6 @@ public class CamelCase implements TemplateMethodModelEx {
     public Object exec(List arguments) throws TemplateModelException {
         SimpleScalar str = (SimpleScalar)arguments.get(0);
         SimpleScalar mode = (SimpleScalar)arguments.get(1);
-        return convertStr(str.toString(), mode.toString());
+        return convertStr(str == null ? "" : str.toString(), mode == null ? "" : mode.toString());
     }
 }

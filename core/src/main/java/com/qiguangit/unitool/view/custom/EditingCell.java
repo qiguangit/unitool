@@ -58,12 +58,12 @@ public class EditingCell<T> extends TableCell<T, String> {
         });
         textField.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.TAB) {
-                final TableView<T> tableView = getTableView();
-                final int columnIndex = tableView.getEditingCell().getColumn();
-                final int rowIndex = tableView.getEditingCell().getRow();
-                final ObservableList columns = tableView.getColumns();
-                final ObservableList items = tableView.getItems();
-
+                TableView<T> tableView = getTableView();
+                int columnIndex = tableView.getEditingCell().getColumn();
+                int rowIndex = tableView.getEditingCell().getRow();
+                ObservableList columns = tableView.getColumns();
+                ObservableList items = tableView.getItems();
+                commitEdit(textField.getText());
                 if (columnIndex < columns.size() - 1) {
                     TableColumn column =  getTableColumnByPosition(tableView, columnIndex + 1);
                     tableView.edit(rowIndex, column);

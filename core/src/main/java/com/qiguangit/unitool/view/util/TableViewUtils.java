@@ -33,4 +33,8 @@ public class TableViewUtils {
         tableColumn.setCellFactory(p -> new ChoiceBoxCell<>(name, choiceBoxStrings));
     }
 
+    public static void setTableColumnMapAsLabelValueFactory(final TableColumn tableColumn, final String name) {
+        tableColumn.setCellValueFactory(new MapValueFactory(name));
+    }
+
 }

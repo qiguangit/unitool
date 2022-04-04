@@ -1,5 +1,6 @@
 package com.qiguangit.unitool.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.beans.BeanInfo;
@@ -12,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class BeanUtils {
     public static Map<String, Object> bean2Map(Object bean) {
         Map<String, Object> map = new HashMap<>();
@@ -24,7 +26,7 @@ public class BeanUtils {
         try {
             t = klass.newInstance();
         } catch (IllegalAccessException | InstantiationException e) {
-            e.printStackTrace();
+            log.error("newInstance failure", e);
             return null;
         }
         callGetterOrSetter(t, map, false);
@@ -46,10 +48,10 @@ public class BeanUtils {
               })
               .collect(Collectors.toList())
               .forEach(descriptor -> {
+                  String fieldName = descriptor.getName();
                   try {
-                      final String fieldName = descriptor.getName();
                       if (getter) {
-                          final Method readMethod = descriptor.getReadMethod();
+                          Method readMethod = descriptor.getReadMethod();
                           map.put(fieldName, readMethod.invoke(o));
                       } else {
                           Method writeMethod = descriptor.getWriteMethod();
@@ -58,7 +60,7 @@ public class BeanUtils {
                           }
                       }
                   } catch (IllegalAccessException | InvocationTargetException e) {
-                      e.printStackTrace();
+                      log.error("invoke getter and setter failure", e);
                   }
               });
 

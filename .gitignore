@@ -22,4 +22,5 @@ build/
 .gradle/
 plugins/
 lombok.config
-
+temp/
+/template/
