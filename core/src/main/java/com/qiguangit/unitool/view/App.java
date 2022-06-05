@@ -1,10 +1,11 @@
 package com.qiguangit.unitool.view;
 
-import com.qiguangit.unitool.plugin.PluginManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class App extends Application {
@@ -14,14 +15,11 @@ public class App extends Application {
 
         Parent root = FXMLLoader.load(getClass().getResource("/resources/main.fxml"));
         primaryStage.setTitle("unitool");
-        final Scene scene = new Scene(root, 700, 800);
+        Rectangle2D screenRectangle = Screen.getPrimary().getBounds();
+        double width = screenRectangle.getWidth();
+        double height = screenRectangle.getHeight();
+        Scene scene = new Scene(root, width * 3 / 4, height * 3 / 4);
         primaryStage.setScene(scene);
         primaryStage.show();
-    }
-
-
-    public static void main(String[] args) {
-        PluginManager.getManager().parsePluginJars();
-        launch(args);
     }
 }

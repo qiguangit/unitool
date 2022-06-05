@@ -1,12 +1,25 @@
 plugins {
+    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.10'
     id "io.freefair.lombok" version "5.0.0-rc2"
 }
 
 allprojects {
+
     apply plugin: 'java'
+    apply plugin: 'application'
+    apply plugin: 'org.openjfx.javafxplugin'
+    apply plugin: 'io.freefair.lombok'
+
     group 'unitool'
     version '1.0-SNAPSHOT'
-    sourceCompatibility = 1.8
+    sourceCompatibility = 11
+
+    javafx {
+        version = "11.0.2"
+        modules = [ 'javafx.controls', 'javafx.fxml' ]
+    }
 
     jar {
         into('META-INF') {
@@ -14,13 +27,16 @@ allprojects {
         }
     }
 
-    repositories {
-        mavenCentral()
-    }
-
     task copyResources(type: Copy) {
+        println "run copyResources"
         from "${projectDir}/src/main/resources"
         into "${buildDir}/classes/java/main/resources"
+    }
+
+    run.dependsOn("copyResources")
+
+    repositories {
+        mavenCentral()
     }
 
     dependencies {
@@ -30,13 +46,12 @@ allprojects {
         implementation 'org.freemarker:freemarker:2.3.31'
         implementation 'org.apache.commons:commons-collections4:4.4'
         implementation 'org.apache.commons:commons-lang3:3.12.0'
-        implementation 'com.google.code.gson:gson:2.8.7'
+        implementation 'com.google.code.gson:gson:2.9.0'
         implementation 'org.dom4j:dom4j:2.1.3'
         implementation 'jaxen:jaxen:1.2.0'
-        implementation 'ch.qos.logback:logback-core:1.2.10'
-        implementation 'ch.qos.logback:logback-classic:1.2.10'
+        implementation 'ch.qos.logback:logback-core:1.2.11'
+        implementation 'ch.qos.logback:logback-classic:1.2.11'
         implementation 'org.slf4j:slf4j-api:1.7.36'
     }
 
 }
-

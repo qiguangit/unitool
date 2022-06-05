@@ -1,61 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Text?>
-
-<VBox fx:id="rootView" alignment="center" prefHeight="700.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.151" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.qiguangit.unitool.plugin.generate.controller.GenerateController">
+<VBox fx:id="rootView" alignment="center" prefHeight="500.0" prefWidth="800.0" stylesheets="/css/generate.css" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.qiguangit.unitool.plugin.generate.controller.GenerateController">
 
    <VBox spacing="10.0">
       <padding>
-         <Insets topRightBottomLeft="10" />
+         <Insets topRightBottomLeft="10"/>
       </padding>
-      <AnchorPane>
-          <HBox alignment="CENTER_LEFT" AnchorPane.leftAnchor="0.0">
-              <Text text="项目路径：" />
+      <HBox spacing="10">
+          <HBox alignment="CENTER_LEFT">
+              <Text text="表名：" wrappingWidth="50" />
+              <TextField fx:id="tfTableNm" />
+          </HBox>
+          <HBox alignment="CENTER_RIGHT">
+              <Text text="包名：" wrappingWidth="50" />
+              <TextField fx:id="tfPackageNm" />
+          </HBox>
+          <HBox alignment="CENTER_LEFT">
+              <Text text="项目路径：" wrappingWidth="80" />
               <TextField fx:id="tvProjectPath" disable="true" />
               <Button onAction="#showDirectoryChooser" text="选择" />
           </HBox>
-          <HBox alignment="CENTER_LEFT" AnchorPane.rightAnchor="0.0">
+      </HBox>
+      <HBox spacing="10">
+          <HBox alignment="CENTER_LEFT">
               <Button onAction="#showVariableDialog" text="设置变量" />
           </HBox>
-      </AnchorPane>
-      <AnchorPane>
-          <HBox alignment="CENTER_LEFT" AnchorPane.leftAnchor="0.0">
-              <Text text="表名：" />
-              <TextField fx:id="tfTableNm" />
+          <HBox alignment="CENTER_LEFT">
+              <Button onAction="#showTemplateDialog" text="模板" />
           </HBox>
-          <HBox alignment="CENTER_RIGHT" AnchorPane.rightAnchor="0.0">
-              <Text text="包名：" />
-              <TextField fx:id="tfPackageNm" />
-              <VBox.margin>
-                  <Insets top="5.0" />
-              </VBox.margin>
+          <HBox alignment="CENTER_RIGHT">
+             <Button fx:id="generate" onAction="#onGenerate" text="生成" />
           </HBox>
-      </AnchorPane>
-      <HBox>
-         <HBox alignment="CENTER_LEFT" spacing="5">
-            <Button fx:id="btAddLine" onAction="#onAddLine" text="添加行" />
-         </HBox>
-         <HBox alignment="CENTER_RIGHT" spacing="5" HBox.hgrow="ALWAYS">
-            <Button fx:id="generate" onAction="#onGenerate" text="生成" />
-         </HBox>
-         <VBox.margin>
-            <Insets top="10.0" />
-         </VBox.margin>
       </HBox>
-      <HBox prefHeight="100.0" prefWidth="200.0" />
    </VBox>
 
-   <TableView fx:id="tvContent" prefHeight="800.0" prefWidth="800.0">
+   <TableView fx:id="tvContent" prefHeight="500.0" prefWidth="800.0" stylesheets="@../css/generate.css">
       <columns>
-         <TableColumn fx:id="idxColumn" prefWidth="70.0" minWidth="40.0" maxWidth="70.0" text="" />
+         <TableColumn fx:id="idxColumn" maxWidth="70.0" minWidth="40.0" prefWidth="70.0" text="" />
          <TableColumn fx:id="attrNameColumn" prefWidth="75.0" text="字段名" />
          <TableColumn fx:id="typeColumn" prefWidth="75.0" text="字段类型" />
          <TableColumn fx:id="notNullColumn" prefWidth="75.0" text="不为空" />
@@ -67,5 +52,9 @@
          <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
       </columnResizePolicy>
    </TableView>
+   <HBox spacing="10" styleClass="operations">
+       <Button fx:id="btnAdd" onAction="#onMouseClick"/>
+       <Button fx:id="btnRemove" onAction="#onMouseClick"/>
+   </HBox>
 
 </VBox>

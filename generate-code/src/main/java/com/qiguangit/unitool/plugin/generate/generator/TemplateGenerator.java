@@ -8,6 +8,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
@@ -39,6 +40,10 @@ public class TemplateGenerator {
         map.put("data", model);
         Template template = conf.getTemplate(templateFileName);
         String realFileName = VariableUtils.parseFileName(templateFileName);
+        File exportPathFile = new File(exportPath);
+        if (!exportPathFile.exists()) {
+            exportPathFile.mkdirs();
+        }
         FileWriter writer = new FileWriter(exportPath + "/" + realFileName);
         template.process(map, writer);
         writer.close();

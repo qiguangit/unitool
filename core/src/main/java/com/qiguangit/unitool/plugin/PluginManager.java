@@ -4,9 +4,6 @@ import com.qiguangit.unitool.plugin.model.PluginJarInfo;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -47,21 +44,8 @@ public class PluginManager {
             PluginJarInfo pluginJarInfo = PluginParser.parse(pluginFile);
             if (pluginJarInfo != null) {
                 addPlugin(pluginJarInfo.getId(), pluginJarInfo);
-                loadJar(pluginFile);
             }
         }
     }
 
-    private void loadJar(File pluginFile) {
-        try {
-            Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-            method.setAccessible(true);
-            URLClassLoader classLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-            URL url = pluginFile.toURI().toURL();
-            method.invoke(classLoader, url);
-        } catch (Exception e) {
-
-        }
-
-    }
 }

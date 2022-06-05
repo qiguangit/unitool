@@ -1,0 +1,28 @@
+
+#btnAdd {
+    -fx-pref-height: 25;
+    -fx-pref-width: 25;
+    -fx-background-image: url(/resources/image/list-add.png);
+    -fx-background-size: 25;
+    -fx-background-color: "transparent";
+}
+
+#btnAdd:hover {
+    -fx-background-color: #4FBFE155;
+}
+
+#btnRemove {
+    -fx-background-image: url(/resources/image/list-remove.png);
+    -fx-pref-height: 25;
+    -fx-pref-width: 25;
+    -fx-background-size: 25;
+    -fx-background-color: "transparent";
+}
+
+#btnRemove:hover {
+    -fx-background-color: #4FBFE155;
+}
+
+.operations {
+    -fx-padding: 3 5 10 10;
+}

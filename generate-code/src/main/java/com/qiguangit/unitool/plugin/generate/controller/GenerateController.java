@@ -2,10 +2,12 @@ package com.qiguangit.unitool.plugin.generate.controller;
 
 import com.google.gson.Gson;
 import com.qiguangit.unitool.controller.BaseController;
+import com.qiguangit.unitool.plugin.SystemVariable;
 import com.qiguangit.unitool.plugin.generate.generator.TemplateGenerator;
 import com.qiguangit.unitool.plugin.generate.model.TableModel;
 import com.qiguangit.unitool.plugin.generate.util.VariableUtils;
 import com.qiguangit.unitool.util.BeanUtils;
+import com.qiguangit.unitool.util.SharedPreferences;
 import com.qiguangit.unitool.view.util.TableViewUtils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -14,9 +16,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Scene;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
@@ -63,13 +63,19 @@ public class GenerateController extends BaseController {
     private VBox rootView;
     private ObservableList<Map<String, Object>> data;
     private TableModel model;
+    private final SharedPreferences sp = SharedPreferences.getSharedPreferences("generate");
+
+    {
+        Map<String, Object> map = new HashMap<>();
+        map.put("tableUpperCamelCase", sp.getString("tableUpperCamelCase"));
+        sp.edit().putAll(map).commit();
+    }
 
     public void initListener() {
         tfTableNm.textProperty().addListener((observable, oldValue, newValue) -> model.setTableName(newValue));
         tfPackageNm.textProperty().addListener((observable, oldValue, newValue) -> model.setPackageName(newValue));
         tvProjectPath.textProperty().addListener((observable, oldValue, newValue) -> {
             model.setProjectPath(newValue);
-            VariableUtils.put("projectPath", newValue);
         });
     }
 
@@ -77,6 +83,7 @@ public class GenerateController extends BaseController {
         model = new TableModel();
         model.setFields(new ArrayList<>());
         HashMap<String, Object> newLineData = new HashMap<>();
+        newLineData.put("idx", 1);
         newLineData.put("typeColumn", "varchar");
         newLineData.put("notNullColumn", "true");
         newLineData.put("lengthColumn", "0");
@@ -94,6 +101,7 @@ public class GenerateController extends BaseController {
                     model = new Gson().fromJson(new String(bytes, StandardCharsets.UTF_8), TableModel.class);
                     tfPackageNm.textProperty().setValue(model.getPackageName());
                     tfTableNm.textProperty().setValue(model.getTableName());
+                    tvProjectPath.textProperty().setValue(model.getProjectPath());
                     data = FXCollections.observableArrayList();
                     model.getFields().forEach(field -> {
                         Map<String, Object> fields = BeanUtils.bean2Map(field);
@@ -120,8 +128,8 @@ public class GenerateController extends BaseController {
         tvContent.setEditable(true);
     }
 
-    public void onAddLine(ActionEvent actionEvent) {
-        final HashMap<String, Object> newLineData = new HashMap<>();
+    private void addEmptyRow() {
+        HashMap<String, Object> newLineData = new HashMap<>();
         newLineData.put("idx", data.size() + 1);
         newLineData.put("type", "varchar");
         newLineData.put("notNull", "true");
@@ -140,10 +148,18 @@ public class GenerateController extends BaseController {
                  });
         try {
             String modelStr = new Gson().toJson(model);
-            TemplateGenerator
-                    .getInstance()
-                    .generate(modelStr, "${tableUpperCamelCase}[.xml](hibernate-mapping).ftl", VariableUtils.get("projectPath"))
-                    .generate(modelStr, "${tableUpperCamelCase}[.java](entity).ftl", VariableUtils.get("projectPath"));
+            File templateFile = new File(SystemVariable.get(SystemVariable.KEY_TEMPLATE_PATH));
+            final File[] files = templateFile.listFiles();
+            TemplateGenerator templateGenerator = TemplateGenerator
+                    .getInstance();
+            for (int i = 0; i < files.length; i++) {
+                File file = files[i];
+                templateGenerator.generate(modelStr, file.getName(), model.getProjectPath() + File.separator + VariableUtils.getPath(file.getName()).replace(".", File.separator));
+            }
+
+            final Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setContentText("生成成功");
+            alert.show();
         } catch (Exception e) {
             logger.error("generate error", e);
         }
@@ -191,13 +207,63 @@ public class GenerateController extends BaseController {
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(rootView.getScene().getWindow());
             stage.setOnCloseRequest(e->{
-                VariableUtils.clear();
+                SharedPreferences.Editor edit = sp.edit();
+                edit.clear();
                 controller.getData().forEach(map -> {
                     String key = (String) map.get("key");
                     String value = (String) map.get("value");
-                    VariableUtils.put(key, value);
+                    edit.putString(key, value);
                 });
+                edit.commit();
             });
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void onMouseClick(ActionEvent event) {
+
+        Button btn = (Button) event.getTarget();
+        switch (btn.getId()) {
+            case "btnAdd":
+                addEmptyRow();
+                break;
+            case "btnRemove":
+                int selectedIndex = tvContent.getSelectionModel().getSelectedIndex();
+                if (selectedIndex > -1) {
+                    data.remove(selectedIndex);
+                }
+                break;
+            default:
+                break;
+        }
+
+    }
+
+    public void showTemplateDialog(ActionEvent event) {
+        try {
+            Stage stage = new Stage();
+
+            FXMLLoader loader = new FXMLLoader();
+            loader.setBuilderFactory(new JavaFXBuilderFactory());
+            VBox vBox = loader.load(getClass().getResourceAsStream("/fxml/templateDialog.fxml"));
+            TemplateController controller =  loader.getController();
+            Scene scene = new Scene(vBox);
+            stage.setScene(scene);
+            stage.initStyle(StageStyle.DECORATED);
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(rootView.getScene().getWindow());
+//            stage.setOnCloseRequest(e->{
+//                SharedPreferences.Editor edit = sp.edit();
+//                edit.clear();
+//                controller.getData().forEach(map -> {
+//                    String key = (String) map.get("key");
+//                    String value = (String) map.get("value");
+//                    edit.putString(key, value);
+//                });
+//                edit.commit();
+//            });
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();

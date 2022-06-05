@@ -1,0 +1,9 @@
+application {
+    mainClassName 'com.qiguangit.unitool.view.Main'
+}
+
+run {
+    doFirst {
+        jvmArgs += "-javaagent:${rootDir}/UnitoolAgent-1.0-SNAPSHOT.jar"
+    }
+}

@@ -4,6 +4,7 @@ import com.qiguangit.unitool.view.custom.ChoiceBoxCell;
 import com.qiguangit.unitool.view.custom.EditingCell;
 import javafx.event.EventHandler;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.MapValueFactory;
 
 import java.util.Map;
@@ -35,6 +36,11 @@ public class TableViewUtils {
 
     public static void setTableColumnMapAsLabelValueFactory(final TableColumn tableColumn, final String name) {
         tableColumn.setCellValueFactory(new MapValueFactory(name));
+    }
+
+    public static void setTableColumnMapAsCheckBoxValueFactory(final TableColumn tableColumn, final String name) {
+        tableColumn.setCellValueFactory(new MapValueFactory(name));
+        tableColumn.setCellFactory(p -> new CheckBoxTableCell<>());
     }
 
 }
